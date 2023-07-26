@@ -2,6 +2,7 @@ from rest_framework import serializers
 from ..models import Scheduling
 
 class SchedulingSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
     scheduling_date = serializers.DateTimeField()
     name = serializers.CharField(max_length=240)
     email = serializers.EmailField()
