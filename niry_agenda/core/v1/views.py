@@ -14,15 +14,37 @@ def scheduling_detail(request, id):
 
     serializer = SchedulingSerializer(obj)
 
-    if serializer.is_valid():
-        return JsonResponse(serializer.data)
-    else:
-        return JsonResponse(serializer.errors)
+    return JsonResponse(serializer.data)
 
 
-@api_view(http_method_names=['GET'])
+@api_view(http_method_names=['GET','POST'])
 def scheduling_list(request):
-    """
-    Search schdulings, return list
-    """
+    if request.method == "GET":
+        """
+        Search schdulings, return list
+        """
+        qs = Scheduling.objects.all()
+
+        serializer = SchedulingSerializer(qs, many=True)
+
+        return JsonResponse(serializer.data, safe=False)
+    if request.method == "POST":
+        data = request.data
+
+        serializer = SchedulingSerializer(data=data)
+
+        if serializer.is_valid():
+            validated_data = serializer.data
+
+            Scheduling.objects.create(
+                scheduling_date = validated_data['scheduling_date'],
+                name = validated_data['name'],
+                email = validated_data['email'],
+                phone = validated_data['phone'],
+                active = validated_data['active'],
+            )
+
+            return JsonResponse(serializer.data, status=201)
+
+        return JsonResponse(serializer.errors, status=400)
 
