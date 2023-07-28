@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.utils import timezone
+
 from ..models import Scheduling
 
 class SchedulingSerializer(serializers.Serializer):
@@ -8,7 +10,27 @@ class SchedulingSerializer(serializers.Serializer):
     email = serializers.EmailField()
     phone = serializers.CharField(max_length=15)
     active = serializers.BooleanField(allow_null=True)
+
+    extra_kwargs= {
+        'name': {'unique': True}
+    }
+
+    def validate(self, attrs):
+        email = attrs.get("email","")
+        phone = attrs.get("phone","")
+
+        if email.endswith(".br") and phone.startswith("+") and not phone.startswith("+55"):
+            raise serializers.ValidationError("Brazilian email must be associated with a brazilian phone number (+55)")
+        
+        return attrs
+
+    def validate_scheduling_date(self, value):
+        if value < timezone.now():
+            raise serializers.ValidationError("Scheduling can't created in the past")
+        
+        return value
     
+            
     def create(self, validated_data):
         scheduling = Scheduling.objects.create(
             scheduling_date = validated_data['scheduling_date'],
