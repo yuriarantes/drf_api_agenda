@@ -14,7 +14,7 @@ scheduling_activate.short_description = "Ativar agendamento"
 
 class SchedulingAdmin(admin.ModelAdmin):
     list_display = ['id','scheduling_date', 'name', 'email', 'phone','active']
-    list_filter = ['name','email','phone']
+    list_filter = ['scheduling_date']
     search_fields = ['scheduling_date','name']
     list_editable = ['name']
     actions = [scheduling_cancel,scheduling_activate]
