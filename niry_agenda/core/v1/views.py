@@ -37,10 +37,9 @@ def scheduling_detail(request, id):
         Remove schdulings for id
         """
         obj = get_object_or_404(Scheduling,id=id)
-        obj.active = False
-        obj.save()
+        obj.delete()
 
-        return   Response(status=204)
+        return Response(status=204)
 
 
 @api_view(http_method_names=['GET','POST'])
