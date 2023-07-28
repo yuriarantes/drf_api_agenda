@@ -1,53 +1,59 @@
 from rest_framework import serializers
 from django.utils import timezone
+from datetime import date
+
+import logging
 
 from ..models import Scheduling
 
-class SchedulingSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
-    scheduling_date = serializers.DateTimeField()
-    name = serializers.CharField(max_length=240)
-    email = serializers.EmailField()
-    phone = serializers.CharField(max_length=15)
-    active = serializers.BooleanField(allow_null=True)
+logging.basicConfig(level=logging.DEBUG,
+                    filename='app.log',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+class SchedulingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scheduling
+        fields = ['id','scheduling_date','name','email','phone','active']
 
     extra_kwargs= {
         'name': {'unique': True}
     }
 
     def validate(self, attrs):
-        email = attrs.get("email","")
-        phone = attrs.get("phone","")
+        email_request = attrs.get("email","")
+        phone_request = attrs.get("phone","")
+        date_request = attrs.get("scheduling_date","")
+        if email_request.endswith(".br") and phone_request.startswith("+") and not phone_request.startswith("+55"):
+            message_error = "Brazilian email must be associated with a brazilian phone number (+55)"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
 
-        if email.endswith(".br") and phone.startswith("+") and not phone.startswith("+55"):
-            raise serializers.ValidationError("Brazilian email must be associated with a brazilian phone number (+55)")
+        if Scheduling.objects.filter(email=email_request, scheduling_date__date=date_request.date()):
+            message_error = "There are already schedulings for this email and appointment day"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
         
         return attrs
 
     def validate_scheduling_date(self, value):
         if value < timezone.now():
-            raise serializers.ValidationError("Scheduling can't created in the past")
-        
+            message_error = "Scheduling can't created in the past"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
+            
         return value
     
-            
-    def create(self, validated_data):
-        scheduling = Scheduling.objects.create(
-            scheduling_date = validated_data['scheduling_date'],
-            name = validated_data['name'],
-            email = validated_data['email'],
-            phone = validated_data['phone'],
-            active = validated_data['active'],
-        )
+    def validate_phone(self, value):   
+        if len(value) < 8:
+            message_error = "Phone number cannot be less than 8 characters"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
 
-        return scheduling
-    
-    def update(self, instance, validated_data):
-        instance.scheduling_date = validated_data.get('scheduling_date', instance.scheduling_date)
-        instance.name = validated_data.get('name', instance.name)
-        instance.email = validated_data.get('email', instance.email)
-        instance.phone = validated_data.get('phone', instance.phone)
-        instance.active = validated_data.get('active', instance.active)
-        instance.save()
+        if value.startswith("+"):
+            new_value = value[1:]
 
-        return instance
+            if not new_value.isdigit():
+                raise serializers.ValidationError("Phone cannot contain special characters")
+
+        return value
+
