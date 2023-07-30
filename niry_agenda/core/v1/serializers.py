@@ -35,7 +35,7 @@ class SchedulingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message_error)
         
         if Scheduling.objects.filter(scheduling_date__gte=date_request-timedelta(minutes=30), scheduling_date__lte=date_request+timedelta(minutes=30)):
-            message_error = "There are schedules within 30 minutes before and after"
+            message_error = "There are schedules within 30 minutes before or after"
             logging.error(message_error)
             raise serializers.ValidationError(message_error)
 
