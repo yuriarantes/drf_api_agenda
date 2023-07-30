@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from datetime import date
+from datetime import date, timedelta
 
 import logging
 
@@ -23,6 +23,7 @@ class SchedulingSerializer(serializers.ModelSerializer):
         email_request = attrs.get("email","")
         phone_request = attrs.get("phone","")
         date_request = attrs.get("scheduling_date","")
+
         if email_request.endswith(".br") and phone_request.startswith("+") and not phone_request.startswith("+55"):
             message_error = "Brazilian email must be associated with a brazilian phone number (+55)"
             logging.error(message_error)
@@ -33,6 +34,11 @@ class SchedulingSerializer(serializers.ModelSerializer):
             logging.error(message_error)
             raise serializers.ValidationError(message_error)
         
+        if Scheduling.objects.filter(scheduling_date__gte=date_request-timedelta(minutes=30), scheduling_date__lte=date_request+timedelta(minutes=30)):
+            message_error = "There are schedules within 30 minutes before and after"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
+
         return attrs
 
     def validate_scheduling_date(self, value):
