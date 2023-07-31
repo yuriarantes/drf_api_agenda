@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Scheduling
+from .models import Scheduling, Schedule, Store
 #from .actions import make_cancelled
 
 def scheduling_cancel(modeladmin, request, queryset):
@@ -20,3 +20,5 @@ class SchedulingAdmin(admin.ModelAdmin):
     actions = [scheduling_cancel,scheduling_activate]
 
 admin.site.register(Scheduling, SchedulingAdmin)
+admin.site.register(Store)
+admin.site.register(Schedule)
