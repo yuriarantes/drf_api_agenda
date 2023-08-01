@@ -28,10 +28,12 @@ class Schedule(models.Model):
 
 class Scheduling(models.Model):
     scheduling_date = models.DateTimeField()
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=240, unique=True)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
-    active = models.BooleanField(null=True)
+    active = models.BooleanField(null=False)
+    
 
     def __str__(self) -> str:
         return self.name
