@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG,
 class SchedulingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scheduling
-        fields = ['id','scheduling_date','name','email','phone','active']
+        fields = ['id','scheduling_date','store','name','email','phone','active']
 
     extra_kwargs= {
         'name': {'unique': True}
@@ -38,6 +38,7 @@ class SchedulingSerializer(serializers.ModelSerializer):
             message_error = "There are schedules within 30 minutes before or after"
             logging.error(message_error)
             raise serializers.ValidationError(message_error)
+        
 
         return attrs
 
