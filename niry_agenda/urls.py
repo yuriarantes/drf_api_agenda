@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 from .core.v1.urls import urlpatterns_schedulings as urls_schedulling
+from .core.v1.urls import urlpatterns_schedules as urls_schedule
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(urls_schedulling))
+    path('api/', include(urls_schedulling)),
+    path('api/', include(urls_schedule))
 ]
