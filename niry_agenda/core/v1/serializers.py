@@ -39,7 +39,6 @@ class SchedulingSerializer(serializers.ModelSerializer):
             logging.error(message_error)
             raise serializers.ValidationError(message_error)
         
-
         return attrs
 
     def validate_scheduling_date(self, value):
