@@ -8,6 +8,9 @@ from .serializers import SchedulingSerializer
 
 from datetime import datetime, timedelta
 
+from .services import SchedulesServices
+
+
 @api_view(http_method_names=['GET','PATCH','DELETE'])
 def scheduling_detail(request, id):
     if request.method == "GET":
@@ -59,47 +62,36 @@ def scheduling_list(request):
         """
         Create new schdulings, return detail
         """
-        data = request.data
+        try:
+            data = request.data
 
-        serializer = SchedulingSerializer(data=data)
+            store = data['store']
+            scheduling_datetime = datetime.strptime(data['scheduling_date'], '%Y-%m-%dT%H:%M:%SZ')
+            scheduling_date = scheduling_datetime.date()
+            scheduling_time = scheduling_datetime.time()
 
-        if serializer.is_valid():
-            serializer.save()
+            schedules = SchedulesServices.get_available_times(store,scheduling_date)
 
-            return JsonResponse(serializer.data, status=201)
+            if scheduling_time in schedules:
+                serializer = SchedulingSerializer(data=data)
 
-        return JsonResponse(serializer.errors, status=400)
+                if serializer.is_valid():
+                    serializer.save()
+
+                    return JsonResponse(serializer.data, status=201)
+
+                return JsonResponse(serializer.errors, status=400)
+            
+            return JsonResponse({"error":"The specified time is not available."})
+        except Exception as error:
+            return JsonResponse({"error":str(error)}, status=500)
 
 @api_view(http_method_names=['GET'])
 def schedule_list(request):
-    schedules = []
-
     store_id = request.query_params.get('store')
     date = datetime.strptime(request.query_params.get('date'),'%Y-%m-%d').date()
 
-    obj_schedule = Schedule.objects.filter(store=store_id,day=date.weekday()).first()
-
-    time = obj_schedule.first_start_at
-    first_end_at = obj_schedule.first_end_at
-
-    if obj_schedule.last_end_at:
-        last_time = obj_schedule.last_end_at
-    else:
-        last_time = obj_schedule.first_end_at
-
-    while time < last_time:
-        if obj_schedule.last_start_at:
-            if time >= obj_schedule.first_end_at and time < obj_schedule.last_start_at:
-                ...
-        schedules.append(time)
-
-    
-        time = (datetime.combine(datetime.today(), time) + timedelta(minutes=30)).time()
-        
-
-    print(obj_schedule.first_start_at)
-    print(obj_schedule.last_start_at)
-
+    schedules = SchedulesServices.get_available_times(store_id,date)
 
     dict = {
         "store": store_id,
