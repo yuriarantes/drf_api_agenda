@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 
 from ..models import Schedule, Scheduling, Store
 
@@ -6,6 +6,8 @@ class SchedulesServices:
     @classmethod
     def get_available_times(cls, store_id, date):
         try:
+            t_zone_utc = timezone.utc
+
             schedules = []
             obj_schedule = Schedule.objects.filter(store=store_id,day=date.weekday()).first()
 
@@ -24,7 +26,7 @@ class SchedulesServices:
                     else:
                         pass
                 
-                if Scheduling.objects.filter(store=store_id, scheduling_date=datetime.combine(date, time)):
+                if Scheduling.objects.filter(store=store_id, scheduling_date=(datetime.combine(date, time)).replace(tzinfo=t_zone_utc)):
                     pass
                 else:
                     schedules.append(time)
