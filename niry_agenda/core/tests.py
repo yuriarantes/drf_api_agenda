@@ -16,13 +16,24 @@ class TestSchedulingList(APITestCase):
         self.assertEqual(data,[])
     
     def test_listagem_de_agendamento_criados(self):
-        Store.objects.create(
+        store =Store.objects.create(
             social_name="Teste",
             cnpj="89871238000165",
             active = True
         )
 
-        store = Store.objects.all().first()
+        list = [
+            {
+                "id":1,
+                "scheduling_date":"2023-08-10T10:00:00Z",
+                "store":1,
+                "name":"Corte Cabelo",
+                "email":"faladaoyuriarantes@gmail.com.br",
+                "phone":"33999467304",
+                "active":True,
+                
+            },
+        ]
 
         Scheduling.objects.create(
             scheduling_date =datetime(2023,8,10,10,00,00).replace(tzinfo=timezone.utc),
@@ -33,12 +44,8 @@ class TestSchedulingList(APITestCase):
             store=store
         )
 
-        obj = Scheduling.objects.all()
-
         response = self.client.get("/api/v1/scheduling/")
 
         data = json.loads(response.content)
 
-        print(type(data))
-
-        #self.assertDictEqual(data)
+        self.assertListEqual(data,list)
