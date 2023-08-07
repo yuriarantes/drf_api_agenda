@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from rest_framework.test import APITestCase
 
-from .models import Scheduling, Store
+from .models import Scheduling, Store, Schedule
 
 class TestSchedulingList(APITestCase):
     
@@ -31,7 +31,6 @@ class TestSchedulingList(APITestCase):
                 "email":"faladaoyuriarantes@gmail.com.br",
                 "phone":"33999467304",
                 "active":True,
-                
             },
         ]
 
@@ -49,3 +48,30 @@ class TestSchedulingList(APITestCase):
         data = json.loads(response.content)
 
         self.assertListEqual(data,list)
+    
+    def test_criar_novo_agendamento(self):
+        store = Store.objects.create(
+            social_name="Teste",
+            cnpj="89871238000165",
+            active = True
+        )
+
+        Schedule.objects.create(
+            store=store,
+            day=3,
+            first_start_at='09:00:00',
+            first_end_at='12:00:00'
+        )
+
+        dict = {
+                "scheduling_date":"2023-08-10T10:00:00Z",
+                "store":1,
+                "name":"Corte Cabelo",
+                "email":"faladaoyuriarantes@gmail.com.br",
+                "phone":"33999467304",
+                "active":"True",
+            }
+        
+        response = self.client.post(path="/api/v1/scheduling/", data=dict, format='json')
+
+        self.assertEqual(response.status_code,201)
