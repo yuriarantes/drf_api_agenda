@@ -4,7 +4,6 @@ class Client(models.Model):
     name = models.CharField(max_length=240, unique=True)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
-    active = models.BooleanField(null=False, default=True)
 
 class Store(models.Model):
     social_name = models.CharField(max_length=240)
@@ -36,6 +35,7 @@ class Scheduling(models.Model):
     scheduling_date = models.DateTimeField()
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
     client  = models.ForeignKey(Client, on_delete=models.CASCADE,null=False)
+    active = models.BooleanField(null=False, default=True)
     
 
     def __str__(self) -> str:
