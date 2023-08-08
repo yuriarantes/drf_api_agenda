@@ -4,20 +4,40 @@ from datetime import date, timedelta
 
 import logging
 
-from ..models import Scheduling
+from ..models import Scheduling, Client
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='app.log',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-class SchedulingSerializer(serializers.ModelSerializer):
+class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Scheduling
-        fields = ['id','scheduling_date','store','name','email','phone','active']
-
+        model = Client
+        fields = ['id','name','email','phone']
+    
     extra_kwargs= {
         'name': {'unique': True}
     }
+
+    def validate_phone(self, value):   
+        if len(value) < 8:
+            message_error = "Phone number cannot be less than 8 characters"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
+
+        if value.startswith("+"):
+            new_value = value[1:]
+
+            if not new_value.isdigit():
+                raise serializers.ValidationError("Phone cannot contain special characters")
+
+        return value
+
+
+class SchedulingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scheduling
+        fields = ['id','scheduling_date','store','client','active']
 
     def validate(self, attrs):
         email_request = attrs.get("email","")
@@ -48,18 +68,3 @@ class SchedulingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message_error)
             
         return value
-    
-    def validate_phone(self, value):   
-        if len(value) < 8:
-            message_error = "Phone number cannot be less than 8 characters"
-            logging.error(message_error)
-            raise serializers.ValidationError(message_error)
-
-        if value.startswith("+"):
-            new_value = value[1:]
-
-            if not new_value.isdigit():
-                raise serializers.ValidationError("Phone cannot contain special characters")
-
-        return value
-
