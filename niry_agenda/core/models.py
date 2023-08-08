@@ -1,9 +1,9 @@
 from django.db import models
 
 class Store(models.Model):
-    social_name = models.CharField(max_length=240, unique=True)
-    cnpj = models.CharField(max_length=14)
-    active = models.BooleanField(null=True)
+    social_name = models.CharField(max_length=240)
+    cnpj = models.CharField(max_length=14, unique=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return self.social_name
@@ -32,7 +32,7 @@ class Scheduling(models.Model):
     name = models.CharField(max_length=240, unique=True)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
-    active = models.BooleanField(null=False)
+    active = models.BooleanField(null=False, default=True)
     
 
     def __str__(self) -> str:
