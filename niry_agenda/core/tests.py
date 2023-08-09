@@ -4,10 +4,20 @@ from datetime import datetime, timezone
 
 from rest_framework.test import APITestCase
 
-from .models import Scheduling, Store, Schedule
+from .models import Scheduling, Store, Schedule, Client
 
 class TestSchedulingList(APITestCase):
+    store = Store.objects.create(
+            social_name="Teste",
+            cnpj="89871238000165",
+            active = True
+        )
     
+    client = Client.objects.create(
+            name="Yuri Arantes",
+            email="falaryuriarantes@gmail.com",
+            phone="33999467304"
+        )
 
     def test_listagem_vazia(self):
         response = self.client.get("/api/v1/scheduling/")
@@ -16,20 +26,12 @@ class TestSchedulingList(APITestCase):
         self.assertEqual(data,[])
     
     def test_listagem_de_agendamento_criados(self):
-        store =Store.objects.create(
-            social_name="Teste",
-            cnpj="89871238000165",
-            active = True
-        )
-
         list = [
             {
                 "id":1,
                 "scheduling_date":"2023-08-10T10:00:00Z",
                 "store":1,
-                "name":"Corte Cabelo",
-                "email":"faladaoyuriarantes@gmail.com.br",
-                "phone":"33999467304",
+                "client":1,
                 "active":True,
             },
         ]
@@ -40,7 +42,7 @@ class TestSchedulingList(APITestCase):
             email= "faladaoyuriarantes@gmail.com.br",
             phone= "33999467304",
             active= True,
-            store=store
+            store=self.store
         )
 
         response = self.client.get("/api/v1/scheduling/")
@@ -74,4 +76,9 @@ class TestSchedulingList(APITestCase):
         
         response = self.client.post(path="/api/v1/scheduling/", data=dict, format='json')
 
+        response_data = response.content
+
+        #print(response_data)
+
         self.assertEqual(response.status_code,201)
+        self.assertListEqual()
