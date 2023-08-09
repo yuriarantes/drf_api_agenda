@@ -33,6 +33,15 @@ class ClientSerializer(serializers.ModelSerializer):
 
         return value
 
+    def validate(self, attrs):
+        email_request = attrs.get("email","")
+        phone_request = attrs.get("phone","")
+
+        if email_request.endswith(".br") and phone_request.startswith("+") and not phone_request.startswith("+55"):
+            message_error = "Brazilian email must be associated with a brazilian phone number (+55)"
+            logging.error(message_error)
+            raise serializers.ValidationError(message_error)
+
 
 class SchedulingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,17 +49,11 @@ class SchedulingSerializer(serializers.ModelSerializer):
         fields = ['id','scheduling_date','store','client','active']
 
     def validate(self, attrs):
-        email_request = attrs.get("email","")
-        phone_request = attrs.get("phone","")
+        client = attrs.get("client","")
         date_request = attrs.get("scheduling_date","")
-
-        if email_request.endswith(".br") and phone_request.startswith("+") and not phone_request.startswith("+55"):
-            message_error = "Brazilian email must be associated with a brazilian phone number (+55)"
-            logging.error(message_error)
-            raise serializers.ValidationError(message_error)
-
-        if Scheduling.objects.filter(email=email_request, scheduling_date__date=date_request.date()):
-            message_error = "There are already schedulings for this email and appointment day"
+ 
+        if Scheduling.objects.filter(client=client, scheduling_date__date=date_request.date()):
+            message_error = "There are already schedulings for this client and appointment day"
             logging.error(message_error)
             raise serializers.ValidationError(message_error)
         
