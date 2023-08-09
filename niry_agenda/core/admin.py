@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.utils.formats import time_format, get_format
 
-from .models import Scheduling, Schedule, Store
+from .models import Scheduling, Schedule, Store, Client
 #from .actions import make_cancelled
 
+class ClientAdmin(admin.ModelAdmin):
+    list_display=['id','name','email','phone']
+    search_fields=['name','email','phone']
 class StoreAdmin(admin.ModelAdmin):
     list_display=['id','social_name','cnpj','active']
     search_fields=['social_name','cnpj']
@@ -14,10 +17,9 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_filter=['store']
 
 class SchedulingAdmin(admin.ModelAdmin):
-    list_display = ['id','scheduling_date', 'name', 'email', 'phone','active']
+    list_display = ['id','scheduling_date', 'client','active']
     list_filter = ['scheduling_date']
-    search_fields = ['scheduling_date','name']
-    list_editable = ['name']
+    search_fields = ['scheduling_date']
     
     def scheduling_cancel(modeladmin, request, queryset):
         queryset.update(active=False)
@@ -33,3 +35,4 @@ class SchedulingAdmin(admin.ModelAdmin):
 admin.site.register(Scheduling, SchedulingAdmin)
 admin.site.register(Store, StoreAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
+admin.site.register(Client, ClientAdmin)
