@@ -22,7 +22,7 @@ class TestSchedulingList(APITestCase):
 
         self.schedules = Schedule.objects.create(
             store=self.store,
-            day=3,
+            day=5,
             first_start_at='09:00:00',
             first_end_at='12:00:00'
         )
@@ -61,15 +61,19 @@ class TestSchedulingList(APITestCase):
     
     def test_criar_novo_agendamento(self):
         dict = {
-                "scheduling_date":"2023-08-10T09:00:00Z",
+                "id":1,
+                "scheduling_date": datetime(2030,8,10,9, tzinfo=timezone.utc) ,# "2030-08-10T09:00:00Z",
                 "store":1,
                 "client":1,
-                "active":"True",
+                "active":True,
             }
         
         response = self.client.post(path="/api/v1/scheduling/", data=dict, format='json')
 
-        response_data = response.content
+        response_data = json.loads(response.content)
 
+        print(response_data)
+        print(dict)
+
+        self.assertDictEqual(response_data,dict)
         self.assertEqual(response.status_code,201)
-        #self.assertListEqual()
