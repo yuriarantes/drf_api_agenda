@@ -27,7 +27,7 @@ class Schedule(models.Model):
         ('6','Sunday'),
     )
 
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, related_name="schedules", on_delete=models.CASCADE)
     day = models.CharField(max_length=20, choices=DAY_CHOICES)
     first_start_at = models.TimeField()
     first_end_at = models.TimeField()
@@ -36,8 +36,8 @@ class Schedule(models.Model):
 
 class Scheduling(models.Model):
     scheduling_date = models.DateTimeField()
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
-    client  = models.ForeignKey(Client, on_delete=models.CASCADE,null=False)
+    store = models.ForeignKey(Store, related_name="scheduling", on_delete=models.CASCADE, null=False)
+    client  = models.ForeignKey(Client, related_name="scheduling", on_delete=models.CASCADE,null=False)
     active = models.BooleanField(null=False, default=True)
     
     def __str__(self) -> str:
