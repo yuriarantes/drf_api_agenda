@@ -12,9 +12,8 @@ from datetime import datetime, timedelta
 from .services import SchedulesServices
 
 
-@api_view(http_method_names=['GET','PATCH','DELETE'])
-def scheduling_detail(request, id):
-    if request.method == "GET":
+class SchedulingDetail(APIView):
+    def get(self,request):
         """
         Search schdulings for id and return details
         """
@@ -24,7 +23,7 @@ def scheduling_detail(request, id):
 
         return JsonResponse(serializer.data)
 
-    if request.method == "PATCH":
+    def patch(self,request):
         """
         Update partial from schdulings for id and return details
         """
@@ -38,7 +37,8 @@ def scheduling_detail(request, id):
             return JsonResponse(serializer.data, status=200, safe=False)
         
         return JsonResponse(serializer.errors, status=400)
-    if request.method == "DELETE":
+
+    def delete(self,request):
         """
         Remove schdulings for id
         """
@@ -46,7 +46,6 @@ def scheduling_detail(request, id):
         obj.delete()
 
         return Response(status=204)
-
 
 class SchedulingList(APIView):
     def get(self, request):
@@ -85,46 +84,7 @@ class SchedulingList(APIView):
             
             return JsonResponse({"error":"The specified time is not available."})
         except Exception as error:
-            return JsonResponse({"error":str(error)}, status=500)
-
-@api_view(http_method_names=['GET','POST'])
-def scheduling_list(request):
-    if request.method == "GET":
-        """
-        Search schdulings, return list of scheduling actives
-        """
-        qs = Scheduling.objects.filter(active=True)
-
-        serializer = SchedulingSerializer(qs, many=True)
-
-        return JsonResponse(serializer.data, safe=False)
-    if request.method == "POST":
-        """
-        Create new schdulings, return detail
-        """
-        try:
-            data = request.data
-
-            store = data['store']
-            scheduling_datetime = datetime.strptime(data['scheduling_date'], '%Y-%m-%dT%H:%M:%SZ')
-            scheduling_date = scheduling_datetime.date()
-            scheduling_time = scheduling_datetime.time()
-
-            schedules = SchedulesServices.get_available_times(store,scheduling_date)
-
-            if scheduling_time in schedules:
-                serializer = SchedulingSerializer(data=data)
-
-                if serializer.is_valid():
-                    serializer.save()
-
-                    return JsonResponse(serializer.data, status=201)
-
-                return JsonResponse(serializer.errors, status=400)
-            
-            return JsonResponse({"error":"The specified time is not available."})
-        except Exception as error:
-            return JsonResponse({"error":str(error)}, status=500)
+            return JsonResponse({"error":str(error)}, status=500) 
 
 @api_view(http_method_names=['GET'])
 def schedule_list(request):
