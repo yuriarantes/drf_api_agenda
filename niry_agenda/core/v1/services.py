@@ -9,7 +9,7 @@ class SchedulesServices:
             t_zone_utc = timezone.utc
 
             schedules = []
-            obj_schedule = Schedule.objects.filter(store=store_id,day=date.weekday()).first()
+            obj_schedule = Schedule.objects.filter(store=store_id,day__contains=str(date.weekday())).first()
 
             time = obj_schedule.first_start_at
 
