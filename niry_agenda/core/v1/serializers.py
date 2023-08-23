@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 import logging
 
-from ..models import Scheduling, Client
+from ..models import Scheduling, Client, Schedule
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='app.log',
@@ -47,6 +47,10 @@ class SchedulingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scheduling
         fields = ['id','scheduling_date','store','client','active']
+    
+    extra_kwargs= {
+        'active': {'write_only': False}
+    }
 
     def validate(self, attrs):
         client = attrs.get("client","")
@@ -71,3 +75,8 @@ class SchedulingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message_error)
             
         return value
+    
+class ScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Schedule
+        fields = ['id','store','day','first_start_at','first_end_at','last_start_at','last_end_at']
