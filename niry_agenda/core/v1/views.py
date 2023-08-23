@@ -13,7 +13,7 @@ from .services import SchedulesServices
 
 
 class SchedulingDetail(APIView):
-    def get(self,request):
+    def get(self,request, id):
         """
         Search schdulings for id and return details
         """
@@ -23,7 +23,7 @@ class SchedulingDetail(APIView):
 
         return JsonResponse(serializer.data)
 
-    def patch(self,request):
+    def patch(self,request,id):
         """
         Update partial from schdulings for id and return details
         """
@@ -38,7 +38,7 @@ class SchedulingDetail(APIView):
         
         return JsonResponse(serializer.errors, status=400)
 
-    def delete(self,request):
+    def delete(self,request,id):
         """
         Remove schdulings for id
         """
@@ -86,18 +86,17 @@ class SchedulingList(APIView):
         except Exception as error:
             return JsonResponse({"error":str(error)}, status=500) 
 
-@api_view(http_method_names=['GET'])
-def schedule_list(request):
-    store_id = request.query_params.get('store')
-    date = datetime.strptime(request.query_params.get('date'),'%Y-%m-%d').date()
+class ScheduleList(APIView):
+    def get(self, request):
+        store_id = request.query_params.get('store')
+        date = datetime.strptime(request.query_params.get('date'),'%Y-%m-%d').date()
 
-    schedules = SchedulesServices.get_available_times(store_id,date)
+        schedules = SchedulesServices.get_available_times(store_id,date)
 
-    dict = {
-        "store": store_id,
-        "date": date,
-        "times":schedules,
-    }
+        dict = {
+            "store": store_id,
+            "date": date,
+            "times":schedules,
+        }
 
-    return JsonResponse(dict)
-
+        return JsonResponse(dict)
